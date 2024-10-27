@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main  # changez cela selon votre branche principale
+  pull_request:
+    branches:
+      - main  # changez cela selon votre branche principale
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up PHP
+        uses: shivammathur/php-action@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, bcmath, gd
+
+      - name: Install dependencies
+        run: |
+          cd Projet/app
+          composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Run PHP CodeSniffer
+        run: |
+          cd Projet/app
+          ./vendor/bin/phpcs --standard=PSR12 src
+
+      - name: Run PHPStan
+        run: |
+          cd Projet/app
+          ./vendor/bin/phpstan analyse src
+
+      - name: Run PHPUnit
+        run: |
+          cd Projet/app
+          ./vendor/bin/phpunit

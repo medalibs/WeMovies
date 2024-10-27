@@ -1,0 +1,31 @@
+services:
+  # FPM Service
+  php:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    container_name: we_movies_php
+    volumes:
+      - .:/var/www/html
+    working_dir: /var/www/html
+    environment:
+      - APP_ENV=dev
+    networks:
+      - we_movies_network
+
+  # Nginx Service
+  nginx:
+    image: nginx:latest
+    container_name: we_movies_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - php
+    networks:
+      - we_movies_network
+
+networks:
+  we_movies_network:
