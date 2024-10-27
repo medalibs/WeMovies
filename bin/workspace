@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+RED="\e[31m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+BLUE="\e[94m"
+ENDCOLOR="\e[0m"
+
+
+
+init ()
+{
+   docker-compose exec -w /var/www/html/app php composer install
+   docker-compose exec -w /var/www/html/app php php bin/console asset-map:compile
+}
+
+start ()
+{
+   docker-compose up -d
+}
+
+stop ()
+{
+   docker-compose stop
+}
+
+tests ()
+{
+   docker-compose exec -w /var/www/html/app php bin/phpunit
+}
+
+phpcs ()
+{
+   docker-compose exec -w /var/www/html/app php vendor/bin/phpcs --standard=PSR12 src/
+}
+
+phpstan ()
+{
+   docker-compose exec -w /var/www/html/app php vendor/bin/phpstan analyse src --level=max
+}
+
+console ()
+{
+  declare ARGS=$@
+  docker-compose exec -w /var/www/html/app php bin/console $ARGS
+}
+
+
+usage ()
+{
+echo -e "
+Usage: ${BLUE} bin/workspace COMMAND ${ENDCOLOR}
+
+${BLUE}start${ENDCOLOR}              Run a container
+${BLUE}stop${ENDCOLOR}               Stop a container
+${BLUE}console${ENDCOLOR}            Symfony console
+${BLUE}tests${ENDCOLOR}              execute phpunit tests
+${BLUE}phpstan${ENDCOLOR}            execute phpstan
+${BLUE}phpcs${ENDCOLOR}              execute phpcs
+"
+}
+
+
+main ()
+{
+declare CMD=$1
+
+    if [ -z $1 ]; then
+        usage
+        exit 0
+    fi
+
+    $@
+
+}
+
+main $@

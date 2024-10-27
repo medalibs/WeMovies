@@ -1,0 +1,32 @@
+<div class="max-w-md mx-auto bg-gray-200 rounded-xl shadow-md overflow-hidden md:max-w-2xl mt-2">
+    <div class="md:flex">
+        <div class="md:shrink-0 flex justify-center">
+            <img class="w-full object-cover md:w-32" src="{{ movie.posterPath }}">
+        </div>
+        <div class="p-4">
+            <div class="mt-4 flex items-center">
+                <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">{{ movie.title }}</div>
+                {% include 'components/rating.html.twig' with { 'rate': movie.rate } %}
+                <span class="text-slate-600 text-sm ml-2"> ({{ movie.voteCount }} votes)</span>
+            </div>
+            <div class="mt-4">
+                <span class="text-slate-900 font-bold">{{ movie.year }}</span>
+                <span class="text-slate-900 font-bold"> - </span>
+                <span class="text-slate-600 text-sm ml-2">Disney, Pixar</span>
+            </div>
+            <p class="mt-2 text-slate-500">{{ movie.description }}</p>
+            <div class="flex justify-end">
+                <button
+                        class="rounded-2xl bg-indigo-600 px-4 py-2 font-bold leading-none text-white"
+                        hx-get="{{ path('app_modal_movie_fragment', { 'id': movie.id }) }}"
+                        hx-target="#modal-body"
+                        hx-swap="innerHTML"
+                        hx-trigger="click"
+                        hx-on="htmx:afterRequest: document.getElementById('movieDetailsModal').classList.remove('hidden')"
+                >
+                    Lire le détail
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

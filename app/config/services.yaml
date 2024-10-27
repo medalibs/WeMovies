@@ -6,6 +6,7 @@
 parameters:
     env(THEMOVIEDB_URL): 'https://api.themoviedb.org'
     env(THEMOVIEDB_URL_IMG): 'https://image.tmdb.org/t/p/'
+    env(YOUTUBE_URL): 'https://www.youtube.com/embed/'
 
 services:
     # default configuration for services in *this* file
@@ -29,9 +30,8 @@ services:
             string $theMovieDBUrl: '%env(THEMOVIEDB_URL)%'
             string $theMovieDBApiKey: '%env(THEMOVIEDB_API_KEY)%'
             string $theMovieDBAUrlImg: '%env(THEMOVIEDB_URL_IMG)%'
+            string $youtubeUrl: '%env(YOUTUBE_URL)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-#    string $theMovieDBUrl: '%env(string:THEMOVIEDB_URL)%'
-#    string $theMovieDBApiKey: '%env(string:THEMOVIEDB_API_KEY)%'

@@ -1,0 +1,22 @@
+{% if trailer.url %}
+
+    <div class="aspect-video">
+        <iframe
+                class="w-full h-full"
+                src="{{ trailer.url }}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+    </div>
+
+
+{% else %}
+    <p>No trailer available for this movie.</p>
+{% endif %}
+
+<div class="mt-4 flex items-center">
+    <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">{{ movie.title }}</div>
+    {% include 'components/rating.html.twig' with { 'rate': movie.rate } %}
+    <span class="text-slate-600 text-sm ml-2"> ({{ movie.voteCount }} Utilisateurs)</span>
+</div>

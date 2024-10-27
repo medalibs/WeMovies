@@ -1,6 +1,12 @@
 FROM php:8.2-fpm
 
-RUN apt-get update
+# Mise à jour des paquets et installation de Git, zip, unzip, et libzip-dev
+RUN apt-get update && \
+    apt-get install -y git zip unzip libzip-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Installation de l'extension PHP zip
+RUN docker-php-ext-install zip
 
 # Vérification des extensions installées
 RUN php -m

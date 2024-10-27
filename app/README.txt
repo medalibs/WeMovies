@@ -13,3 +13,8 @@ php vendor/bin/phpstan analyse src --level=max
 # phpunit
 php bin/phpunit
 
+#
+php vendor/bin/phpcs --standard=PSR12 src/
+#
+php vendor/bin/phpcbf --standard=PSR12 src/
+

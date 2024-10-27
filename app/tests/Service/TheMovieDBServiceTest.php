@@ -27,7 +27,8 @@ class TheMovieDBServiceTest extends TestCase
             $this->cache,
             'api_key_test',
             'https://api.themoviedb.org',
-            'https://image.tmdb.org/t/p/'
+            'https://image.tmdb.org/t/p/',
+            'https://www.youtube.com/embed/',
         );
     }
 
@@ -39,9 +40,7 @@ class TheMovieDBServiceTest extends TestCase
                 json_encode(
                     [
                         'genres' => [
-                            'results' => [
-                                ['id' => 1, 'name' => 'Action'],
-                            ],
+                            ['id' => 1, 'name' => 'Action'],
                         ],
                     ]
                 )
@@ -66,13 +65,14 @@ class TheMovieDBServiceTest extends TestCase
         $this->assertEquals('Action', $genres[0]->getName());
     }
 
-    public function testGetFilmsByGenreReturnsMovies(): void
+    public function testGetMoviesByGenreReturnsMovies(): void
     {
         $response = $this->createMock(ResponseInterface::class);
         $response->method('getContent')
             ->willReturn(json_encode([
                 'results' => [
                     [
+                        'id' => 1,
                         'title' => 'Test Movie',
                         'overview' => 'Description of Test Movie',
                         'poster_path' => '/test.jpg',
@@ -89,7 +89,7 @@ class TheMovieDBServiceTest extends TestCase
             ->method('request')
             ->willReturn($response);
 
-        $movies = $this->service->getFilmsByGenre([28]);
+        $movies = $this->service->getMoviesByGenre([28]);
 
         $this->assertArrayHasKey('all', $movies);
         $this->assertArrayHasKey('bestMovie', $movies);

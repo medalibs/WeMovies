@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\ValueObject\Genre;
 use App\ValueObject\Movie;
+use App\ValueObject\Trailer;
 
 interface MovieServiceInterface
 {
@@ -17,5 +18,9 @@ interface MovieServiceInterface
      *
      * @return array{all: Movie[],bestMovie: Movie}
      */
-    public function getFilmsByGenre(array $genres): array;
+    public function getMoviesByGenre(array $genres): array;
+
+    public function getMovieById(int $id): ?Movie;
+
+    public function getMovieTrailerById(int $id): ?Trailer;
 }

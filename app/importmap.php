@@ -16,4 +16,7 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    'htmx.org' => [
+        'version' => '1.9.12',
+    ],
 ];

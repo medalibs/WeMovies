@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\ValueObject\Genre;
 use App\ValueObject\Movie;
+use App\ValueObject\Trailer;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -11,7 +12,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class TheMovieDBService implements MovieServiceInterface
 {
     public const API_GET_GENRES_LIST = '/3/genre/movie/list';
-    public const API_GET_FILMS_BY_GENRE = '/3/discover/movie';
+    public const API_GET_MOVIES_BY_GENRE = '/3/discover/movie';
+    public const API_GET_MOVIE_BY_ID = '/3/movie/%d';
+
+    public const API_GET_MOVIE_VIDEO_BY_ID = '/3/movie/%d/videos';
     public const API_LANG = 'en';
     public const API_IMG_SIZE = 'w200';
     public const API_BACK_IMG_SIZE = 'w1920_and_h800_multi_faces';
@@ -23,6 +27,7 @@ class TheMovieDBService implements MovieServiceInterface
         private readonly string $theMovieDBApiKey,
         private readonly string $theMovieDBUrl,
         private readonly string $theMovieDBAUrlImg,
+        private readonly string $youtubeUrl,
     ) {
     }
 
@@ -31,7 +36,7 @@ class TheMovieDBService implements MovieServiceInterface
      */
     public function getGenres(): array
     {
-        return $this->cache->get('themoviedb.genres', function (ItemInterface $item) {
+        return $this->cache->get('themoviedb.genres.cache', function (ItemInterface $item) {
             $item->expiresAfter(self::CACHE_LIFETIME);
 
             $response = $this->httpClient->request(
@@ -46,7 +51,12 @@ class TheMovieDBService implements MovieServiceInterface
             );
             $data = json_decode($response->getContent(false), true);
 
-            if (200 !== $response->getStatusCode() || !is_array($data) || !array_key_exists('genres', $data) || empty($data['genres']['results'])) {
+            if (
+                200 !== $response->getStatusCode() || !is_array($data) || !array_key_exists(
+                    'genres',
+                    $data
+                ) || empty($data['genres'])
+            ) {
                 return [];
             }
 
@@ -59,11 +69,11 @@ class TheMovieDBService implements MovieServiceInterface
      *
      * @return array{all: Movie[],bestMovie: Movie}|array{}
      */
-    public function getFilmsByGenre(array $genres): array
+    public function getMoviesByGenre(array $genres): array
     {
         $response = $this->httpClient->request(
             'GET',
-            sprintf('%s%s', $this->theMovieDBUrl, self::API_GET_FILMS_BY_GENRE),
+            sprintf('%s%s', $this->theMovieDBUrl, self::API_GET_MOVIES_BY_GENRE),
             [
                 'query' => [
                     'api_key' => $this->theMovieDBApiKey,
@@ -76,11 +86,71 @@ class TheMovieDBService implements MovieServiceInterface
 
         $data = json_decode($response->getContent(false), true);
 
-        if (200 !== $response->getStatusCode() || !is_array($data) || !array_key_exists('results', $data) || count($data['results']) < 1) {
+        if (
+            200 !== $response->getStatusCode() || !is_array($data) || !array_key_exists('results', $data) || count(
+                $data['results']
+            ) < 1
+        ) {
             return [];
         }
 
         return ['all' => $this->convertToMoviesObject($data), 'bestMovie' => $this->getBestMovie($data)];
+    }
+
+    public function getMovieById(int $id): ?Movie
+    {
+        $response = $this->httpClient->request(
+            'GET',
+            sprintf('%s%s', $this->theMovieDBUrl, sprintf(self::API_GET_MOVIE_BY_ID, $id)),
+            [
+                'query' => [
+                    'api_key' => $this->theMovieDBApiKey,
+                    'language' => self::API_LANG,
+                ],
+            ],
+        );
+
+        $data = json_decode($response->getContent(false), true);
+
+        if (
+            200 !== $response->getStatusCode() || !is_array($data)
+        ) {
+            return null;
+        }
+
+        return $this->getMovieDetails($data);
+    }
+
+    public function getMovieTrailerById(int $id): ?Trailer
+    {
+        $response = $this->httpClient->request(
+            'GET',
+            sprintf('%s%s', $this->theMovieDBUrl, sprintf(self::API_GET_MOVIE_VIDEO_BY_ID, $id)),
+            [
+                'query' => [
+                    'api_key' => $this->theMovieDBApiKey,
+                    'language' => self::API_LANG,
+                ],
+            ],
+        );
+
+        $data = $response->toArray();
+
+        if (
+            200 !== $response->getStatusCode() || !is_array($data) || !array_key_exists('results', $data) || count(
+                $data['results']
+            ) < 1
+        ) {
+            return null;
+        }
+
+        foreach ($data['results'] as $video) {
+            if ('Trailer' === $video['type'] && 'YouTube' === $video['site']) {
+                return new Trailer($video['name'], $this->youtubeUrl . $video['key']);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -107,6 +177,7 @@ class TheMovieDBService implements MovieServiceInterface
     private function getMovieDetails(array $data): Movie
     {
         return new Movie(
+            (int) $data['id'],
             $data['title'],
             $data['overview'],
             sprintf('%s%s%s', $this->theMovieDBAUrlImg, self::API_IMG_SIZE, $data['poster_path']),
@@ -118,13 +189,13 @@ class TheMovieDBService implements MovieServiceInterface
     }
 
     /**
-     * @param array{results: array<array<string>>} $data
+     * @param array<array<string>> $data
      *
      * @return Genre[]
      */
     private function convertToGenresObject(array $data): array
     {
-        return array_map(fn ($result) => $this->getGenreDetails($result), $data['results']);
+        return array_map(fn ($result) => $this->getGenreDetails($result), $data);
     }
 
     /**

@@ -7,15 +7,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class IndexController extends AbstractController
+class HomePageController extends AbstractController
 {
-    #[Route('/index', name: 'app_index')]
+    #[Route('/', name: 'app_home_page')]
     public function index(MovieServiceInterface $movieService): Response
     {
-        return $this->render('index/index.html.twig', [
-            'controller_name' => 'IndexController',
+        return $this->render('pages/home.html.twig', [
             'genres' => $movieService->getGenres(),
-            'movies' => $movieService->getFilmsByGenre([28]),
+            'movies' => $movieService->getMoviesByGenre([28]),
         ]);
     }
 }

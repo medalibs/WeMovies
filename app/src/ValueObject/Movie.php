@@ -5,6 +5,7 @@ namespace App\ValueObject;
 readonly class Movie
 {
     public function __construct(
+        public int $id,
         public string $title,
         public string $description,
         public string $posterPath,
@@ -13,6 +14,11 @@ readonly class Movie
         public int $rate,
         public string $backDropPath,
     ) {
+    }
+
+    public function getId(): int
+    {
+        return $this->id;
     }
 
     public function getTitle(): string

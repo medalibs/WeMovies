@@ -1,0 +1,9 @@
+<div id="movieDetailsModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="modal-overlay fixed inset-0 bg-black opacity-50" hx-on="click: this.closest('#movieDetailsModal').classList.add('hidden')"></div>
+    <div class="modal-content bg-white rounded-lg overflow-hidden shadow-lg max-w-2xl w-full relative min-h-[300px]">
+        <span class="close absolute top-2 right-2 cursor-pointer" hx-on="click: this.closest('#movieDetailsModal').classList.add('hidden')">&times;</span>
+        <div id="modal-body" class="p-4 min-h-[500px]">
+            <!-- Le contenu du modal -->
+        </div>
+    </div>
+</div>

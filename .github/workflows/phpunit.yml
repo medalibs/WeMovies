@@ -1,4 +1,4 @@
-name: CI
+name: PHPUnit
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  phpunit:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,22 +20,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          tools: composer, phpstan, phpunit, phpcs
+          tools: composer, phpunit
 
       - name: Install dependencies
         run: |
           cd app
           composer install --prefer-dist --no-progress --no-suggest
-
-      - name: Run PHPStan
-        run: |
-          cd app
-          ./vendor/bin/phpstan analyse src
-
-      - name: Run PHPCS
-        run: |
-          cd app
-          ./vendor/bin/phpcs --standard=PSR12 src/
 
       - name: Run PHPUnit
         run: |
